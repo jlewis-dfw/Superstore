@@ -9,7 +9,6 @@ Blazor Server App. Business analysis based off of CSV data.
 - Keep track of how many hours spent. 
 
 ## Nuget Packages
-All third party packages used are open source. 
 | Name / Nuget Link | Purpose / Reasoning | GitHub | Documentation | 
 | ----------------- |---------------------| ------------|-----------------------|
 | [CsvHelper](https://www.nuget.org/packages/CsvHelper/30.1.0?_src=template)  | Importing CSV data | [Link](https://github.com/JoshClose/CsvHelper) | [Link](https://joshclose.github.io/CsvHelper/) |
