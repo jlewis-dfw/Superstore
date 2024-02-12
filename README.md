@@ -20,10 +20,10 @@ All third party packages used are open source. Available for both personal and c
 ## QA / Decision log
 | M/D:T     | Type | Question / Decision                                          | Answer / Assumption / Notes                                                       |  
 | --------- |------| -------------------------------------------------------------|-----------------------------------------------------------------------------------|
-| 2/12:2300 | AC   | What is a season? It is not part of the dataset provided     | Meteorological temperate seasons in the northern hemisphere                       |
-| 2/12:2300 | TA   | How to implement seasons                                     | OrderDate.Month [12,1,2]=Winter, [3,4,5]=Spring, [6,7,8]=Summer, [9,10,11]=Autumn |
-| 2/12:2340 | DD   | Decision: Use CsvHelper nuget package for importing CSV data | Implementing CSV importing correctly would take too much time.   |
-| 2/22:0015 | DD   | Decision: Use Syncfusion                                     | Syncfusion has one of the most complete and well documented controls. I have a startup company license  |
+| 2/12:0800 | AC   | What is a season? It is not part of the dataset provided     | Meteorological temperate seasons in the northern hemisphere                       |
+| 2/12:0800 | TA   | How to implement seasons                                     | OrderDate.Month [12,1,2]=Winter, [3,4,5]=Spring, [6,7,8]=Summer, [9,10,11]=Autumn |
+| 2/12:0830 | DD   | Decision: Use CsvHelper nuget package for importing CSV data | Implementing CSV importing correctly would take too much time.   |
+| 2/22:0830 | DD   | Decision: Use Syncfusion                                     | Syncfusion has one of the most complete and well documented controls. I have a startup company license  |
 
 
  ## Timelog
