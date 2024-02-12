@@ -1,0 +1,62 @@
+﻿@page "/CsvDataGrid"
+@using Superstore.Models
+@using Superstore.Services;
+@using Syncfusion.Blazor.Data;
+@using Syncfusion.Blazor;
+@using System.Collections;
+@using Syncfusion.Blazor.Grids;
+@inject ICsvDataService csvDataService;
+
+<PageTitle>DataGrid</PageTitle>
+<h2>DataGrid</h2>
+<br />
+<SfGrid @ref="@Grid" TValue="CsvData" ID="Grid" DataSource="GridData" AllowResizing="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" AllowFiltering="true" AllowExcelExport="true" Toolbar="@(new List<string>() { "ExcelExport" })" Height="615">
+	<GridPageSettings PageSize="100"></GridPageSettings>
+	<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+	<GridEvents OnToolbarClick="ToolbarClick" TValue="CsvData"></GridEvents>
+	<GridColumns>
+		<GridColumn Field="RowID" HeaderText="ID" Type="ColumnType.Integer"></GridColumn>
+		<GridColumn Field="OrderID" HeaderText="OrderID" Type="ColumnType.String" Visible="false"></GridColumn> 
+		<GridColumn Field="OrderDate" HeaderText="OrderDate" Type="ColumnType.DateOnly" Format="d"></GridColumn>
+		<GridColumn Field="ShipDate" HeaderText="ShipDate" Type="ColumnType.DateOnly" Format="d"></GridColumn>
+		<GridColumn Field="ShipMode" HeaderText="ShipMode" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="CustomerID" HeaderText="CustomerID" Type="ColumnType.String" Visible="false"></GridColumn>
+		<GridColumn Field="CustomerName" HeaderText="CustomerName" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="Segment" HeaderText="Segment" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="Country" HeaderText="Country" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="City" HeaderText="City" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="State" HeaderText="State" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="PostalCode" HeaderText="PostalCode" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="Region" HeaderText="Region" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="ProductID" HeaderText="ProductID" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="Category" HeaderText="Category" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="SubCategory" HeaderText="SubCategory" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="ProductName" HeaderText="ProductName" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="Sales" HeaderText="Sales" Type="ColumnType.Decimal"></GridColumn>
+		<GridColumn Field="Quantity" HeaderText="Quantity" Type="ColumnType.Decimal"></GridColumn>
+		<GridColumn Field="Discount" HeaderText="Discount" Type="ColumnType.Decimal"></GridColumn>
+		<GridColumn Field="Profit" HeaderText="Profit" Type="ColumnType.Decimal"></GridColumn>
+		<GridColumn Field="Season" HeaderText="Season" Type="ColumnType.String"></GridColumn>
+		<GridColumn Field="YearQuarter" HeaderText="YearQuarter" Type="ColumnType.String"></GridColumn>
+	</GridColumns>
+</SfGrid>
+
+@code {
+	public IEnumerable<CsvData>? GridData { get; set; }
+	protected async override void OnInitialized()
+	{
+		GridData = await csvDataService.GetCsvImportAsync(new CancellationToken());
+	}
+
+
+	SfGrid<CsvData>? Grid;
+
+	public async Task ToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+	{
+		if (args.Item.Id == "Grid_excelexport")
+		{
+			await this.Grid!.ExportToExcelAsync();
+		}
+	}
+}
+
