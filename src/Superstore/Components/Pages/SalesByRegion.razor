@@ -1,0 +1,60 @@
+﻿<h3>Sales By Region</h3>
+@page "/salesbyregion"
+@using Superstore.Helpers.Contants
+@using Superstore.Models
+@using Superstore.Services;
+@using Superstore.ViewModels.Charts
+@using Syncfusion.Blazor.Data;
+@using Syncfusion.Blazor;
+@using System.Collections;
+@using Syncfusion.Blazor.Charts;
+@using Syncfusion.Blazor.DropDowns
+@inject ICsvDataService csvDataService;
+
+<PageTitle>Sales by Region</PageTitle>
+<div class="container-fluid">
+	<div class="row" style="padding-bottom:20px">
+			<label class="example-label">Seasons</label>
+			<SfMultiSelect TValue="string[]" TItem="StandardLookup" Mode="@VisualMode.Box" DataSource="@Seasons" EnableSelectionOrder="true" @bind-Value="@regionvalue" Width="500px">
+				<MultiSelectFieldSettings Text="Name" Value="Id"></MultiSelectFieldSettings>
+				<MultiSelectEvents TItem="StandardLookup" TValue="string[]" ValueChange="@ValueChangeHandler"></MultiSelectEvents>
+			</SfMultiSelect>
+	</div>
+
+	<div class="row">
+<SfChart>
+	<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+     <ChartPrimaryYAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Double"></ChartPrimaryYAxis>
+	<ChartTooltipSettings Enable="true" Header="Sales" Format="<b>${series.name} : ${point.y}</b>"></ChartTooltipSettings>
+	<ChartSeriesCollection>
+		<ChartSeries DataSource="@RegionSalesByCategory" Name="Total" XName="Region" Width="2" Opacity="1" YName="Total" Type="ChartSeriesType.Column" Visible="false"></ChartSeries>
+		<ChartSeries DataSource="@RegionSalesByCategory" Name="Furniture" XName="Region" Width="2" Opacity="1" YName="Furniture" Type="ChartSeriesType.Column"></ChartSeries>
+		<ChartSeries DataSource="@RegionSalesByCategory" Name="OfficeSupplies" XName="Region" Width="2" Opacity="1" YName="OfficeSupplies" Type="ChartSeriesType.Column"></ChartSeries>
+		<ChartSeries DataSource="@RegionSalesByCategory" Name="Technology" XName="Region" Width="2" Opacity="1" YName="Technology" Type="ChartSeriesType.Column"></ChartSeries>
+	</ChartSeriesCollection>
+</SfChart>
+	</div>
+</div>
+@code {
+	private string[] regionvalue = Helpers.Contants.StandardLookupFields.Seasons; 
+	public IEnumerable<RegionSalesByCategory> RegionSalesByCategory = new List<RegionSalesByCategory>();
+	public IEnumerable<StandardLookup> Seasons = new List<StandardLookup>();
+	public bool ShowSelectAllCheckBox { get; set; } = true;
+	protected async override void OnInitialized()
+	{
+		await base.OnInitializedAsync();
+		RegionSalesByCategory = await csvDataService.RegionSalesByCategories(new CancellationToken());
+		Seasons = await csvDataService.GetStandardLookups(StandardLookupFields.Season, new CancellationToken());
+		StateHasChanged();
+	}
+
+	private void ValueChangeHandler(MultiSelectChangeEventArgs<string[]> args)
+	{
+		RegionSalesByCategory =  csvDataService.RegionSalesByCategories(new CancellationToken(), args.Value).Result;
+	}
+
+	public void OnSelectAllChange(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
+	{
+		this.ShowSelectAllCheckBox = args.Checked;
+	}
+}
