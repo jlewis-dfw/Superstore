@@ -1,4 +1,4 @@
-﻿using Superstore.Components;
+using Superstore.Components;
 using Syncfusion.Blazor;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Identity;

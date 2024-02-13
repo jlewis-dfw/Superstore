@@ -7,8 +7,8 @@
 @using Syncfusion.Blazor.Grids;
 @inject ICsvDataService csvDataService;
 
-<PageTitle>DataGrid</PageTitle>
-<h2>DataGrid</h2>
+<PageTitle>Sales (CSV Import)</PageTitle>
+<h2>Sales (CSV Import)</h2>
 <br />
 <SfGrid @ref="@Grid" TValue="CsvData" ID="Grid" DataSource="GridData" AllowResizing="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" AllowFiltering="true" AllowExcelExport="true" Toolbar="@(new List<string>() { "ExcelExport" })" Height="615">
 	<GridPageSettings PageSize="100"></GridPageSettings>
@@ -46,6 +46,7 @@
 	protected async override void OnInitialized()
 	{
 		GridData = await csvDataService.GetCsvImportAsync(new CancellationToken());
+		StateHasChanged();
 	}
 
 
