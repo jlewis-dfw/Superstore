@@ -34,5 +34,7 @@ Blazor Server App. Business analysis based off of CSV data.
 | 2/12:0830 | .50   | Design decisions / 3rd party Nuget package desicions        |                                                 |2.00     |
 | 2/12:1730 | 2.50  | Coding                                                      |                                                 |4.00     |
 | 2/13:1200 | 1.50  | Coding, PR, Basic requirements met                          |                                                 |5.50     |
+| 2/15:1200 | 4.00 | Coding                                                       |                                                 |9.50     |
+| 2/15:1200 | 3.00 | Coding, PR Dashboard, Complete                               |                                                 |12.50    |
 
 
