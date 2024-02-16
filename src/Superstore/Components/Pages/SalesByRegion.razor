@@ -1,5 +1,4 @@
-﻿<h3>Sales By Region</h3>
-@page "/salesbyregion"
+﻿@page "/salesbyregion"
 @using Superstore.Helpers.Contants
 @using Superstore.Models
 @using Superstore.Services;
@@ -10,6 +9,8 @@
 @using Syncfusion.Blazor.Charts;
 @using Syncfusion.Blazor.DropDowns
 @inject ICsvDataService csvDataService;
+
+<h3>Sales By Region</h3>
 
 <PageTitle>Sales by Region</PageTitle>
 <div class="container-fluid">
@@ -44,7 +45,7 @@
 	{
 		await base.OnInitializedAsync();
 		RegionSalesByCategory = await csvDataService.RegionSalesByCategories(new CancellationToken());
-		Seasons = await csvDataService.GetStandardLookups(StandardLookupFields.Season, new CancellationToken());
+		Seasons = await csvDataService.GetStandardLookupsAsync(StandardLookupFields.Season, new CancellationToken());
 		StateHasChanged();
 	}
 

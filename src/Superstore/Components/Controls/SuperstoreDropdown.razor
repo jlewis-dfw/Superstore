@@ -1,0 +1,37 @@
+﻿@using Superstore.Models
+@using Superstore.ViewModels.DropDowns
+@using Syncfusion.Blazor.DropDowns
+@inject ICsvDataService csvDataService
+@inject ILogger<Controls.SuperstoreDropdown> logger
+@inject IJSRuntime jsRuntime;
+<label>Seasons</label>
+
+<SfMultiSelect TValue="string[]" TItem="StandardLookup" Mode="@VisualMode.Box" DataSource="@Dropdown.StandardLookups" EnableSelectionOrder="true" @bind-Value="@Dropdown.BindVales" Width="@Dropdown.Width">
+	<MultiSelectFieldSettings Text="Name" Value="Id"></MultiSelectFieldSettings>
+	<MultiSelectEvents TItem="StandardLookup" TValue="string[]" ValueChange="ValueChangeHandler"></MultiSelectEvents>
+</SfMultiSelect>
+
+
+@code {
+	[Parameter]
+	public Superstore.ViewModels.DropDowns.SuperstoreDropDownVm Dropdown { get; set; }
+	[Parameter]
+	public EventCallback<Superstore.ViewModels.DropDowns.SuperstoreDropDownVm> OnFilterChanged { get; set; }
+
+
+	protected async override void OnInitialized()
+	{
+		logger.LogCritical("SuperstoreDropdown LogCritical");
+		logger.LogDebug("SuperstoreDropdown LogDebug");
+		logger.LogInformation("SuperstoreDropdown LogInformation");
+		await base.OnInitializedAsync();
+	}
+
+	private void ValueChangeHandler(MultiSelectChangeEventArgs<string[]> args)
+	{
+		logger.LogCritical("SuperstoreDropdown ValueChangeHandler");
+		//RegionSalesByCategory = csvDataService.RegionSalesByCategories(new CancellationToken(), args.Value).Result;
+	}
+
+	
+}

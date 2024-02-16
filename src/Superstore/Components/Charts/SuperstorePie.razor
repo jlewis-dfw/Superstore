@@ -1,0 +1,42 @@
+﻿@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Spinner
+<div class="control-section" align='center'>
+    @if (IsLoaded)
+    {
+
+            <SfAccumulationChart Height="@PieChart.Height" Width="@PieChart.Height" EnableBorderOnMouseMove="@PieChart.EnableBorderOnMouseMove" Title="@PieChart.Title" EnableAnimation="@PieChart.EnableAnimation" EnableSmartLabels="@PieChart.EnableSmartLabels">
+                <AccumulationChartTooltipSettings Header="" Format="@PieChart.TooltipFormat" Enable="@PieChart.TooltipEnable"></AccumulationChartTooltipSettings>
+                <AccumulationChartLegendSettings Visible="@PieChart.ChartLegendVisible"></AccumulationChartLegendSettings>
+                <AccumulationChartSeriesCollection>
+                    <AccumulationChartSeries DataSource="@PieChart.PrimarySeriesData.Data" XName="@PieChart.PrimarySeriesData.XName" YName="@PieChart.PrimarySeriesData.YName" Radius="@PieChart.Radius" Name="Name" StartAngle="@PieChart.StartAngle"
+                                             InnerRadius="@PieChart.ExplodeInnerRadius" ExplodeIndex="PieChart.ExplodeIndex" Explode="@PieChart.Explode" ExplodeOffset="@PieChart.ExplodeOffset">
+                        <AccumulationDataLabelSettings Visible="true" Name="DataLabelMappingName" Position="AccumulationLabelPosition.Outside">
+                            <AccumulationChartDataLabelFont Size=@PieChart.AccumulationChartDataLabelFontSize FontWeight=@PieChart.AccumulationChartDataLabelFontWeight></AccumulationChartDataLabelFont>
+                            <AccumulationChartConnector Length=@PieChart.AccumulationChartConnector Type="ConnectorType.Curve"></AccumulationChartConnector>
+                        </AccumulationDataLabelSettings>
+                    </AccumulationChartSeries>
+                </AccumulationChartSeriesCollection>
+            </SfAccumulationChart>
+    }
+    else
+    {
+        <SfSpinner Size="40" Type="SpinnerType.Bootstrap" Visible="true"></SfSpinner>
+    }
+
+</div>
+@code {
+    [Parameter]
+    public PieChart PieChart { get; set; }
+
+    public bool IsLoaded { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Random rnd = new Random();
+        await Task.Delay(rnd.Next(1000, 2000));
+        IsLoaded = true;
+
+    }
+}

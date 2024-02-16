@@ -5,8 +5,8 @@ namespace Superstore.Services
 {
 	public interface ISuperstoreCache
 	{
-		object? GetCacheDataByKey(string key);
-		T? GetCahceDataByType<T>(string key) where T : class;
+		object GetCacheDataByKey(string key);
+		T GetCahceDataByType<T>(string key) where T : class;
 		void RemoveObjectFromCache(string key);
 		void ResetAllInMemoryData();
 		void AddObjectToCache(string key, object data, double absoluteExpiration = 15);
@@ -20,7 +20,7 @@ namespace Superstore.Services
 		{
 			_cache = memoryCache;
 		}
-		public object? GetCacheDataByKey(string key)
+		public object GetCacheDataByKey(string key)
 		{
 			try
 			{
@@ -29,11 +29,11 @@ namespace Superstore.Services
 			catch (Exception) { return null; }
 		}
 
-		public T? GetCahceDataByType<T>(string key) where T : class
+		public T GetCahceDataByType<T>(string key) where T : class
 		{
 			try
 			{
-				return (T?)_cache.Get(key);
+				return (T)_cache.Get(key);
 			}
 			catch (Exception)
 			{
