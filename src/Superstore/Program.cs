@@ -5,12 +5,15 @@ using Azure.Identity;
 using Superstore.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ISuperstoreCache, SuperstoreCache>();
 builder.Services.AddScoped<ICsvDataService, CsvDataService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 var keyVaultEndpoint = builder.Configuration["KeyVault:BaseUrl"];
 if (!string.IsNullOrEmpty(keyVaultEndpoint))
 {
@@ -22,12 +25,13 @@ if (!string.IsNullOrEmpty(keyVaultEndpoint))
 	if (syncfSecretKey != null) Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfSecretKey);
 
 }
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 var app = builder.Build();
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Error", createScopeForErrors: true);
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
 

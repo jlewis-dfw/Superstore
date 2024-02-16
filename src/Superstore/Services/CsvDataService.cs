@@ -1,9 +1,12 @@
 ﻿using CsvHelper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Superstore.Helpers.Contants;
 using Superstore.Mappers;
 using Superstore.Models;
+using Superstore.ViewModels;
 using Superstore.ViewModels.Charts;
 using Syncfusion.Blazor.Data;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Superstore.Services
@@ -12,19 +15,29 @@ namespace Superstore.Services
     {
 
         /// <summary>
-        /// Reads CSV file and stores to cache.
+        /// Async: Reads CSV file and stores to cache.
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IEnumerable<CsvData>> GetCsvImportAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<CsvData>> GetCsvImportAsync(CancellationToken cancellationToken, StandardLookupFilters filters = null);
+
 
         /// <summary>
-        /// Returns sum of sales by region
+        ///  Reads CSV file and stores to cache.
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <param name="seasonsFilter">Optional filter: Season</param>
         /// <returns></returns>
-        Task<IEnumerable<RegionSalesByCategory>> RegionSalesByCategories(CancellationToken cancellationToken, string[]? seasonsFilter = null);
+        IEnumerable<CsvData> GetCsvImport(StandardLookupFilters filters = null);
+
+		
+
+
+		/// <summary>
+		/// Returns sum of sales by region
+		/// </summary>
+		/// <param name="cancellationToken"></param>
+		/// <param name="seasonsFilter">Optional filter: Season</param>
+		/// <returns></returns>
+		Task<IEnumerable<RegionSalesByCategory>> RegionSalesByCategories(CancellationToken cancellationToken, string[]? seasonsFilter = null);
 
         /// <summary>
         /// Returns distinct vales of Region, Category, and Season.  
@@ -33,10 +46,14 @@ namespace Superstore.Services
         /// <param name="field"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>StandardLookups based on field param</returns>
-        Task<List<StandardLookup>> GetStandardLookups(string field, CancellationToken cancellationToken);
+        Task<List<StandardLookup>> GetStandardLookupsAsync(string field, CancellationToken cancellationToken);
 
 
-        Task<IEnumerable<RegionSalesByCategoryByTimeCategory>> RegionSales(CancellationToken cancellationToken);
+		List<StandardLookup> GetStandardLookups(string field);
+
+        StandardLookupDataSet GetStandardLookupDataSet();
+
+		Task<IEnumerable<RegionSalesByCategoryByTimeCategory>> RegionSales(CancellationToken cancellationToken);
 
         /// <summary>
         /// View model for SalesLineChart. Containining ChartSeries and RegionSales
@@ -54,13 +71,50 @@ namespace Superstore.Services
         {
             this.superstoreCache = superstoreCache;
         }
-        public async Task<IEnumerable<CsvData>> GetCsvImportAsync(CancellationToken cancellationToken)
+
+
+
+
+
+        public async Task<IEnumerable<CsvData>> GetCsvImportAsync(CancellationToken cancellationToken, StandardLookupFilters filters = null)
+        {
+
+            return await Task.Run(() => GetCsvImport());
+        }
+
+		private  IEnumerable<CsvData> GetFiltedCsvData(IEnumerable<CsvData> data, StandardLookupFilters filters)
+		{
+            if(data == null) data = GetCsvImport();
+
+			var filtereddata = data;
+            var standardLookupDataSet = GetStandardLookupDataSet();
+			if (filters.SeasonsFilter != null && filters.SeasonsFilter.Length != standardLookupDataSet.Seasons.Count())
+            {
+                filtereddata = filtereddata.Where(s => filters.SeasonsFilter.Contains(s.Season));
+			}
+			if (filters.RegionsFilter != null && filters.RegionsFilter.Length != standardLookupDataSet.Regions.Count())
+			{
+				filtereddata = filtereddata.Where(s => filters.RegionsFilter.Contains(s.Region));
+			}
+			if (filters.CategoriesFilter != null && filters.CategoriesFilter.Length != standardLookupDataSet.Categories.Count())
+			{
+				filtereddata = filtereddata.Where(s => filters.CategoriesFilter.Contains(s.Category));
+			}
+            return filtereddata.ToList();
+		}
+
+
+		public IEnumerable<CsvData> GetCsvImport(StandardLookupFilters filters = null)
         {
             var data = superstoreCache.GetCahceDataByType<List<CsvData>>(CacheKeys.CsvData);
-            if (data != null)
+            if (data != null && filters == null)
             {
                 return data;
             }
+            else if(data != null && filters != null)
+            {
+                return GetFiltedCsvData(data, filters);
+			}
             else
             {
                 List<CsvData> csvDataSet = new List<CsvData>();
@@ -69,7 +123,7 @@ namespace Superstore.Services
                 using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
                 {
                     csv.Context.RegisterClassMap<CsvDataMap>();
-                    csvDataSet = await csv.GetRecordsAsync<CsvData>().ToListAsync();
+                    csvDataSet = csv.GetRecords<CsvData>().ToList();
                 }
                 csvDataSet.Where(c => c.OrderDate.Month == 12 || c.OrderDate.Month == 1 || c.OrderDate.Month == 2).SetValue(c => c.Season = "Winter").ToList();
                 csvDataSet.Where(c => c.OrderDate.Month == 3 || c.OrderDate.Month == 4 || c.OrderDate.Month == 5).SetValue(c => c.Season = "Spring").ToList();
@@ -78,13 +132,67 @@ namespace Superstore.Services
                 csvDataSet.SetValue(c => c.YearQuarter = $"{c.OrderDate.Year}Q{Math.Abs(c.OrderDate.Month / 3) + 1}").ToList();
 
                 superstoreCache.AddObjectToCache(CacheKeys.CsvData, csvDataSet, 30);
+
+                if(filters != null)
+                {
+					return GetFiltedCsvData(data, filters);
+				}
                 return csvDataSet;
             }
-
         }
+        
+
+        public StandardLookupDataSet GetStandardLookupDataSet()
+        {
+			var data = superstoreCache.GetCahceDataByType<StandardLookupDataSet>(CacheKeys.StandardLookupDataSet);
+			if (data != null)
+			{
+				return data;
+			}
 
 
-        public async Task<List<StandardLookup>> GetStandardLookups(string field, CancellationToken cancellationToken)
+			var dataSet = new StandardLookupDataSet()
+            {
+
+                Categories = GetStandardLookups(Helpers.Contants.StandardLookupFields.Category),
+                Regions = GetStandardLookups(Helpers.Contants.StandardLookupFields.Region),
+                Seasons = GetStandardLookups(Helpers.Contants.StandardLookupFields.Season)
+            };
+			superstoreCache.AddObjectToCache(CacheKeys.StandardLookupDataSet, dataSet, 30);
+			return dataSet;
+        }
+            
+		public List<StandardLookup> GetStandardLookups(string field)
+		{
+			var data =  GetCsvImport();
+			switch (field)
+			{
+				case StandardLookupFields.Season:
+
+					return data.DistinctBy(c => c.Season).Select(c => new StandardLookup
+					{
+						Id = c.Season,
+						Name = c.Season
+					}).ToList();
+				case StandardLookupFields.Region:
+					return data.DistinctBy(c => c.Region).Select(c => new StandardLookup
+					{
+						Id = c.Region,
+						Name = c.Region
+					}).ToList();
+				case StandardLookupFields.Category:
+					return data.DistinctBy(c => c.Category).Select(c => new StandardLookup
+					{
+						Id = c.Category,
+						Name = c.Category
+					}).ToList();
+				default:
+					return new List<StandardLookup>();
+			}
+		}
+
+
+		public async Task<List<StandardLookup>> GetStandardLookupsAsync(string field, CancellationToken cancellationToken)
         {
             var data = await GetCsvImportAsync(cancellationToken);
             switch (field)
@@ -102,21 +210,19 @@ namespace Superstore.Services
                         Id = c.Region,
                         Name = c.Region
                     }).ToList();
-                default:
+				case StandardLookupFields.Category:
+					return data.DistinctBy(c => c.Category).Select(c => new StandardLookup
+					{
+						Id = c.Category,
+						Name = c.Category
+					}).ToList();
+				default:
                     return new List<StandardLookup>();
             }
         }
 
         public async Task<RegionSalesByCategoryByTimeCategoryViewModel> RegionSalesByCategoryByTimeCategoryViewModel(CancellationToken cancellationToken)
         {
-
-
-            var data = superstoreCache.GetCahceDataByType<RegionSalesByCategoryByTimeCategoryViewModel>(CacheKeys.CsvData);
-            if (data != null)
-            {
-                return data;
-            }
-
 
             var regionSalesByCategoryByTimeCategoryViewModel = new RegionSalesByCategoryByTimeCategoryViewModel();
             var salesByCat = await RegionSales(cancellationToken);
@@ -128,7 +234,7 @@ namespace Superstore.Services
                 {
                     var category = StandardLookupFields.Categories[c];
                     var lineChartData = salesByCat.Where(s => s.Region == region && s.Category == category)
-                    .Select(r => new LineChartData
+                    .Select(r => new ChartData
                     {
                         XValue = r.TimeCategory,
                         YValue = r.Total,
@@ -137,8 +243,6 @@ namespace Superstore.Services
 
                 }
             }
-            superstoreCache.AddObjectToCache(CacheKeys.CsvData, regionSalesByCategoryByTimeCategoryViewModel, 30);
-
             return regionSalesByCategoryByTimeCategoryViewModel;
         }
 

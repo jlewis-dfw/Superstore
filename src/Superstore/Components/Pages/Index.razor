@@ -1,85 +1,189 @@
 ﻿@page "/"
+@using Superstore.Models
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Notifications
+@inject NavigationManager NavigationManager
+@inject IDashboardService DashboardService
+@inject ILogger<Controls.SuperstoreDropdown> logger
+@inject ILogger<Index> logger
 
-<PageTitle>Home</PageTitle>
 
-<span class="pageheader">Superstore</span>
-<br />
-<p class="pagecontent">Blazor Server App. Business analysis based off of CSV data.</p>
-<div class="controlregion">
 
-<ul class="ulstyle">
-	<li class="list">
-        <NavLink class="nav-link" href="CsvDataGrid">
-            <span class="syncfusion-blazor-index-icons syncfusion-blazor-icon-datagrid" aria-hidden="true"></span>CsvDataGrid
- 	    </NavLink>
- 	</li>
-        <li>
-            <NavLink class="nav-link" href="salesbyregion">
-                <span class="syncfusion-blazor-icons syncfusion-blazor-icon-stockchart" aria-hidden="true"></span>>Sales by Region - Bar
-            </NavLink>
-        </li>
-        <li>
-            <NavLink class="nav-link" href="saleslinechart">
-                <span class="syncfusion-blazor-icons syncfusion-blazor-icon-stockchart" aria-hidden="true"></span>>Sales by Region - Line
-            </NavLink>
-        </li>
+<SfToast ID="toast_default" @ref="ToastObj" Title="Filter Error" Content="@ToastContent" Timeout="5000" Icon="e-error toast-icons" CssClass="e-toast-danger">
+        <ToastPosition X="Right"></ToastPosition>
+    </SfToast>
 
-</ul>
+<div class="container-fluid">
+	<SfDashboardLayout @ref="dashboardObject" Columns="12" CellSpacing="@Spacing" CellAspectRatio="@Ratio">
+		<DashboardLayoutPanels>
+			<DashboardLayoutPanel Column="0" Row="0" SizeX="6" SizeY="1">
+					<HeaderTemplate>
+						<span class="title">Filters</span>
+					</HeaderTemplate>
+				<ContentTemplate>
+					<div class="container">
+						<div class="row">
+						<div class="col col-9"
+							
+								<label>Seasons</label>
+								<SfMultiSelect TValue="string[]" TItem="StandardLookup" Mode="@VisualMode.Box" DataSource="@Dashboard.StandardLookupDataSet.Seasons" EnableSelectionOrder="true" @bind-Value="@Dashboard.Filters.SeasonsFilter">
+									<MultiSelectFieldSettings Text="Name" Value="Id"></MultiSelectFieldSettings>
+									<MultiSelectEvents TItem="StandardLookup" TValue="string[]"></MultiSelectEvents>
+								</SfMultiSelect>
+
+								<label>Regions</label>
+								<SfMultiSelect TValue="string[]" TItem="StandardLookup" Mode="@VisualMode.Box" DataSource="@Dashboard.StandardLookupDataSet.Regions" EnableSelectionOrder="true" @bind-Value="@Dashboard.Filters.RegionsFilter">
+									<MultiSelectFieldSettings Text="Name" Value="Id"></MultiSelectFieldSettings>
+									<MultiSelectEvents TItem="StandardLookup" TValue="string[]"></MultiSelectEvents>
+								</SfMultiSelect>
+
+								<label>Categories</label>
+								<SfMultiSelect TValue="string[]" TItem="StandardLookup" Mode="@VisualMode.Box" DataSource="@Dashboard.StandardLookupDataSet.Categories" EnableSelectionOrder="true" @bind-Value="@Dashboard.Filters.CategoriesFilter">
+									<MultiSelectFieldSettings Text="Name" Value="Id"></MultiSelectFieldSettings>
+									<MultiSelectEvents TItem="StandardLookup" TValue="string[]"></MultiSelectEvents>
+								</SfMultiSelect>
+							</div>
+
+						<div class="col-3"
+							<div class="row pb-3">
+								<button class="btn btn-primary" @onclick="FilterData"> Filter Data </button>
+								</div>
+								<div class="row">
+								<button class="btn btn-secondary" @onclick="ResetData"> Reset </button>
+								</div>
+								</div>
+							</div>
+						</div>
+
+
+      
+
+				</ContentTemplate>
+			</DashboardLayoutPanel>
+			<DashboardLayoutPanel Column="6" Row="0" SizeX="6" SizeY="1">
+				<HeaderTemplate>
+					<span class="title">Summary</span>
+				</HeaderTemplate>
+				<ContentTemplate>
+					<h4>Sales: @Dashboard.StoreSummary.TotalSales</h4>
+					<h4>Profit: @Dashboard.StoreSummary.TotalProfit</h4>
+					<h4>Items Shipped: @Dashboard.StoreSummary.TotalItemsShipped</h4>
+					<h4>Customers: @Dashboard.StoreSummary.UniqueCustomers</h4>
+				</ContentTemplate>
+			</DashboardLayoutPanel>
+
+			<DashboardLayoutPanel Column="0" Row="1" SizeX="4" SizeY="3">
+				<HeaderTemplate>
+					<span class="title">Sales By Season</span>
+				</HeaderTemplate>
+				<ContentTemplate>
+					<Superstore.Components.Charts.SuperstorePie PieChart="@Dashboard.PieChartSalesBySeason"></Superstore.Components.Charts.SuperstorePie>
+				</ContentTemplate>
+			</DashboardLayoutPanel>
+
+
+			<DashboardLayoutPanel Column="4" Row="1" SizeX="4" SizeY="3">
+				<HeaderTemplate>
+					<span class="title">Sales By Region</span>
+				</HeaderTemplate>
+				<ContentTemplate>
+					<Superstore.Components.Charts.SuperstorePie PieChart="@Dashboard.PieChartSalesByRegion"></Superstore.Components.Charts.SuperstorePie>
+
+				</ContentTemplate>
+			</DashboardLayoutPanel>
+
+			<DashboardLayoutPanel Column="4" Row="1" SizeX="4" SizeY="3">
+				<HeaderTemplate>
+					<span class="title">Sales By Category</span>
+				</HeaderTemplate>
+				<ContentTemplate>
+					<Superstore.Components.Charts.SuperstorePie PieChart="@Dashboard.PieChartSalesByCategory"></Superstore.Components.Charts.SuperstorePie>
+
+				</ContentTemplate>
+			</DashboardLayoutPanel>
+
+
+			<DashboardLayoutPanel Column="0" Row="2" SizeX="12" SizeY="3">
+				<HeaderTemplate>
+					<span class="title">Total Sales By Season, Region, and Category</span>
+				</HeaderTemplate>
+				<ContentTemplate>
+					<Superstore.Components.Charts.SuperstoreLine LineChart="@Dashboard.LineChartSalesByCategoryRegionSeason"></Superstore.Components.Charts.SuperstoreLine>
+
+				</ContentTemplate>
+			</DashboardLayoutPanel>
+		</DashboardLayoutPanels>
+	</SfDashboardLayout>
 </div>
-<style>
-    .ulstyle {
-        margin-top: 10px;
-        margin-bottom: 20px;
-        display: inline-block;
-        list-style-type: none !important;
-        padding-left: 0px !important;
-    }
 
-    .controlregion {
-        margin-top: 50px;
-    }
+@code{
+	SfToast ToastObj;
+	private string[] catfilters;
+	private string[] regfilters;
+	private string[] seasonfilters;
+	Dashboard Dashboard = new();
+	SfDashboardLayout dashboardObject;
+	private Theme Theme { get; set; }
+	private double[] Spacing = new double[] { 15, 15 };
+	private double Ratio = 160 / 100;
+	private string ToastContent = String.Empty;
 
-    .pagecontent {
-        font-family: sans-serif !important;
-font-size: 16px;
-color: #333333;
-letter-spacing: 0.34px;
-line-height: 24px;
-margin-top: 10px;
-    }
-    
 
-    .list {
-        float: left;
-        line-height: 40px;
-        min-width: 280px;
-        font-family: sans-serif !important;
-        font-size: 19px;
-        color: #0073DC;
-    }
+	protected override void OnInitialized()
+	{
 
-    .syncfusion-blazor-index-icons {
-        font-family: "sbicons";
-        color: #0073DC !important;
-        font-style: normal;
-        font-weight: normal;
-        font-variant: normal;
-        text-transform: none;
-        padding-right: 13px;
-        font-size: 18px;
-    }
+		Dashboard = DashboardService.GetDashboardViewModel(Dashboard.Filters);
+		catfilters = Dashboard.Filters.CategoriesFilter;
+		regfilters = Dashboard.Filters.RegionsFilter;
+		seasonfilters = Dashboard.Filters.SeasonsFilter;
+	}
 
-    .productheader {
-        font-family: sans-serif !important;
-        font-size: 19px !important;
-        color: #333333 !important;
-        letter-spacing: 0.41px ;
-    }
+	private async Task FilterData()
+	{
+		List<string> filterErrors = new List<string>();
+		if(Dashboard.Filters.SeasonsFilter == null || Dashboard.Filters.SeasonsFilter.Length == 0)
+			filterErrors.Add("Season filter must have at least one season");
+		if (Dashboard.Filters.CategoriesFilter == null || Dashboard.Filters.CategoriesFilter.Length == 0)
+			filterErrors.Add("Category filter must have at least one category");
+		if (Dashboard.Filters.RegionsFilter == null || Dashboard.Filters.SeasonsFilter.Length == 0)
+			filterErrors.Add("Region filter must have at least one region");
 
-    .pageheader {
-        font-family: sans-serif !important;
-        font-size: 24px !important;
-        color: #333333 ;
-        font-weight: bold !important;
-    }
-</style>
+
+		if(!filterErrors.Any())
+		{
+			
+			Dashboard = DashboardService.GetDashboardViewModel(Dashboard.Filters);
+			StateHasChanged();
+		}
+		else
+		{
+			filterErrors.Add("Filters have been reset");
+			ToastContent = String.Join(". ", filterErrors);
+			await Task.Delay(200);
+			await ShowToast();
+			ResetData();
+		}
+	}
+
+	private void ResetData()
+	{
+		Dashboard.Filters.SeasonsFilter = seasonfilters;
+		Dashboard.Filters.CategoriesFilter = catfilters;
+		Dashboard.Filters.RegionsFilter = regfilters;
+		Dashboard = DashboardService.GetDashboardViewModel(Dashboard.Filters);
+		StateHasChanged();
+	}
+
+	private async Task ShowToast()
+	{
+	
+		await this.ToastObj.ShowAsync();
+	}
+
+
+}
+
+
+
+
+

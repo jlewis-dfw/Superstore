@@ -1,4 +1,6 @@
-﻿namespace Superstore.ViewModels.Charts
+﻿using Superstore.Models;
+
+namespace Superstore.ViewModels.Charts
 {
 
 
@@ -14,8 +16,8 @@
 		public string Region { get; set; } = default!;
 		public string Category { get; set; } = default!;
 		public double Total { get; set; }
-		public string? TimeCategory { get; set; }
-
-    }
+		public string TimeCategory { get; set; }
+		public Season Season { get; set; }
+	}
 
 }

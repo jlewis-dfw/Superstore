@@ -1,0 +1,58 @@
+﻿@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Spinner
+@using Syncfusion.Blazor.DropDowns
+@using Superstore.Models
+@inject IDashboardService DashboardService
+
+
+<div class="control-section" align='center'>
+    @if (IsLoaded)
+    {
+        <SfChart Title="@LineChart.Title" Height="@LineChart.Height" Width="@LineChart.Height" EnableAnimation="@LineChart.EnableAnimation">
+            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+            <ChartTooltipSettings Enable="@LineChart.TooltipEnable" Header="@LineChart.TooltipHeader" Format="<b>${series.name} : ${point.y}</b>"></ChartTooltipSettings>
+            <ChartSeriesCollection>
+                @foreach (var series in LineChart.SeriesDataSet)
+                {
+                    <ChartSeries Name=@series.Name XName=@series.XName YName=@series.YName DataSource=@series.Data Type="ChartSeriesType.Line">
+                        <ChartMarker Visible=@series.ChartMarkerVisible Height=@series.ChartMarkerHeight Width=@series.ChartMarkerWidth />
+                    </ChartSeries>
+                }
+            </ChartSeriesCollection>
+        </SfChart>
+    }
+    else
+    {
+        <SfSpinner Size="40" Type="SpinnerType.Bootstrap" Visible="true"></SfSpinner>
+    }
+
+</div>
+@code {
+    [Parameter]
+    public LineChart LineChart { get; set; }
+
+    public IEnumerable<StandardLookup> Seasons = new List<StandardLookup>();
+
+    public bool IsLoaded { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Random rnd = new Random();
+        await Task.Delay(rnd.Next(1000, 2000));
+        IsLoaded = true;
+
+    }
+
+    public void FilterData(Superstore.ViewModels.DropDowns.SuperstoreDropDownVm superstoreDropDown)
+    {
+        Console.WriteLine("FilterData");
+
+    }
+
+    // private void ValueChangeHandler(MultiSelectChangeEventArgs<string[]> args)
+    // {
+    //     RegionSalesByCategory = csvDataService.RegionSalesByCategories(new CancellationToken(), args.Value).Result;
+    // }
+}
